@@ -1,0 +1,148 @@
+doctype html
+html(lang="vi")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title Kết quả dự đoán giá vé máy bay
+        link(rel="stylesheet", href="/style.css")
+        link(href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css", rel="stylesheet")
+    body
+        .container
+            .header
+                h1
+                    i.fas.fa-chart-line
+                    |  Kết quả dự đoán giá vé máy bay
+
+            if success
+                .result-container.success
+                    .result-header
+                        i.fas.fa-check-circle
+                        h2 Dự đoán thành công!
+
+                    .flight-info
+                        h3
+                            i.fas.fa-info-circle
+                            |  Thông tin chuyến bay
+                        .info-grid
+                            .info-item
+                                .label Hãng hàng không:
+                                .value= flightData.airline
+                            .info-item
+                                .label Khởi hành từ:
+                                .value= flightData.departureCity
+                            .info-item
+                                .label Đến:
+                                .value= flightData.arrivalCity
+                            .info-item
+                                .label Hạng vé:
+                                .value= flightData.travelClass
+                            .info-item
+                                .label Số điểm dừng:
+                                .value= flightData.stops == '0' ? 'Bay thẳng' : `${flightData.stops} điểm dừng`
+                            .info-item
+                                .label Thời gian khởi hành:
+                                .value= new Date(flightData.departureFullTime).toLocaleString('vi-VN')
+                            .info-item
+                                .label Thời gian đến:
+                                .value= new Date(flightData.arrivalFullTime).toLocaleString('vi-VN')
+                            .info-item
+                                .label Ngày dự đoán:
+                                .value= new Date(flightData.predictionDate).toLocaleDateString('vi-VN')
+                            .info-item
+                                .label Thời lượng bay:
+                                .value= `${flightData.duration} phút`
+                            .info-item
+                                .label Số ngày đặt trước:
+                                .value= `(Tự tính)`
+
+                    .prediction-result
+                        h3
+                            i.fas.fa-money-bill-wave
+                            |  Kết quả dự đoán từ #{selectedModels.length} mô hình
+                        .models-comparison
+                            each result in prediction.results
+                                .model-result(class=result.is_lowest ? 'best-price' : result.is_highest ? 'highest-price' : '', class=result.selected ? 'selected-model' : 'unselected-model')
+                                    .model-header
+                                        .model-name
+                                            case result.model
+                                                when 'RandomForestRegressor'
+                                                    | 🌲 Random Forest
+                                                when 'DecisionTreeRegressor'
+                                                    | 🌳 Decision Tree
+                                                when 'StackingRegressor'
+                                                    | 📚 Stacking
+                                                default
+                                                    = result.model
+                                        .model-badges
+                                            if result.selected
+                                                .badge.selected-badge
+                                                    i.fas.fa-check
+                                                    |  Được chọn
+                                            if result.is_lowest
+                                                .badge.best
+                                                    i.fas.fa-star
+                                                    |  Giá tốt nhất
+                                            else if result.is_highest
+                                                .badge.highest
+                                                    i.fas.fa-arrow-up
+                                                    |  Giá cao nhất
+
+                                    if result.success
+                                        .model-price
+                                            .price-value= result.formatted_price
+                                            if !result.is_lowest && result.price_diff
+                                                .price-diff +#{result.price_diff.toLocaleString()} VND so với giá tốt nhất
+                                    else
+                                        .model-error
+                                            i.fas.fa-exclamation-triangle
+                                            |  Lỗi: #{result.error}
+
+                        .price-summary
+                            .summary-item
+                                .label
+                                    i.fas.fa-chart-line
+                                    |  Khoảng giá:
+                                .value= prediction.summary.price_range || 'N/A'
+                            .summary-item
+                                .label
+                                    i.fas.fa-check-circle
+                                    |  Dự đoán thành công:
+                                .value #{prediction.summary.successful_predictions}/#{prediction.summary.total_models} mô hình
+
+                        .price-note
+                            i.fas.fa-lightbulb
+                            |  Giá vé được dự đoán dựa trên dữ liệu lịch sử và có thể thay đổi theo thời gian thực
+
+                    .actions
+                        a.btn.btn-primary(href="/")
+                            i.fas.fa-redo
+                            |  Dự đoán chuyến khác
+                        a.btn.btn-info(href="/history")
+                            i.fas.fa-history
+                            |  Xem lịch sử
+                        button.btn.btn-secondary(onclick="window.print()")
+                            i.fas.fa-print
+                            |  In kết quả
+
+            else
+                .result-container.error
+                    .result-header
+                        i.fas.fa-exclamation-triangle
+                        h2 Có lỗi xảy ra!
+
+                    .error-message
+                        p= error 
+
+                    .actions
+                        a.btn.btn-primary(href="/")
+                            i.fas.fa-arrow-left
+                            |  Quay lại trang chủ
+                        button.btn.btn-secondary(onclick="window.history.back()")
+                            i.fas.fa-redo
+                            |  Thử lại
+
+        script.
+            // Auto print functionality
+            if (window.location.search.includes('print=true')) {
+                window.print();
+            }

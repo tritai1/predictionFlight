@@ -1,0 +1,130 @@
+[
+  {
+    "id": 1765088803375,
+    "timestamp": "2025-12-07T06:26:43.375Z",
+    "flightData": {
+      "airline": "Vietnam Airlines",
+      "departureCity": "Hà Nội",
+      "arrivalCity": "TP.HCM",
+      "travelClass": "Phổ thông",
+      "stops": 0,
+      "departureFullTime": "2025-12-08T06:00:00.000Z",
+      "arrivalFullTime": "2025-12-07T19:00:00.000Z",
+      "predictionDate": "2025-12-07T00:00:00.000Z",
+      "duration": 45,
+      "models": [
+        "DecisionTreeRegressor"
+      ]
+    },
+    "prediction": {
+      "success": true,
+      "results": [
+        {
+          "success": true,
+          "model": "RandomForestRegressor",
+          "price": 3929673,
+          "formatted_price": "3.929.673 VND",
+          "selected": false,
+          "is_lowest": false,
+          "is_highest": true,
+          "price_diff": 947648
+        },
+        {
+          "success": true,
+          "model": "DecisionTreeRegressor",
+          "price": 2982025,
+          "formatted_price": "2.982.025 VND",
+          "selected": true,
+          "is_lowest": true,
+          "is_highest": false,
+          "price_diff": 0
+        },
+        {
+          "success": true,
+          "model": "StackingRegressor",
+          "price": 2989062,
+          "formatted_price": "2.989.062 VND",
+          "selected": false,
+          "is_lowest": false,
+          "is_highest": false,
+          "price_diff": 7037
+        }
+      ],
+      "summary": {
+        "total_models": 3,
+        "selected_models": [
+          "DecisionTreeRegressor"
+        ],
+        "successful_predictions": 3,
+        "price_range": "2,982,025 - 3,929,673 VND"
+      }
+    },
+    "selectedModels": [
+      "DecisionTreeRegressor"
+    ]
+  },
+  {
+    "id": 1765088175104,
+    "timestamp": "2025-12-07T06:16:15.104Z",
+    "flightData": {
+      "airline": "Vietnam Airlines",
+      "departureCity": "Hà Nội",
+      "arrivalCity": "TP.HCM",
+      "travelClass": "Thương gia",
+      "stops": 0,
+      "departureFullTime": "2025-12-07T17:00:00.000Z",
+      "arrivalFullTime": "2025-12-08T08:00:00.000Z",
+      "predictionDate": "2025-12-07T00:00:00.000Z",
+      "duration": 44,
+      "models": [
+        "RandomForestRegressor"
+      ]
+    },
+    "prediction": {
+      "success": true,
+      "results": [
+        {
+          "success": true,
+          "model": "RandomForestRegressor",
+          "price": 5044110,
+          "formatted_price": "5.044.110 VND",
+          "selected": true,
+          "is_lowest": false,
+          "is_highest": false,
+          "price_diff": 480571
+        },
+        {
+          "success": true,
+          "model": "DecisionTreeRegressor",
+          "price": 4563539,
+          "formatted_price": "4.563.539 VND",
+          "selected": false,
+          "is_lowest": true,
+          "is_highest": false,
+          "price_diff": 0
+        },
+        {
+          "success": true,
+          "model": "StackingRegressor",
+          "price": 5072341,
+          "formatted_price": "5.072.341 VND",
+          "selected": false,
+          "is_lowest": false,
+          "is_highest": true,
+          "price_diff": 508802
+        }
+      ],
+      "summary": {
+        "total_models": 3,
+        "selected_models": [
+          "RandomForestRegressor"
+        ],
+        "successful_predictions": 3,
+        "price_range": "4,563,539 - 5,072,341 VND"
+      }
+    },
+    "selectedModels": [
+      "RandomForestRegressor"
+    ]
+  }
+]

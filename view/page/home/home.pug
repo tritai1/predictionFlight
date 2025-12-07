@@ -1,0 +1,196 @@
+doctype html
+html(lang="vi")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title Dự đoán giá vé máy bay
+        link(rel="stylesheet", href="/style.css")
+        link(href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css", rel="stylesheet")
+    body
+        .container
+            .header
+                h1
+                    i.fas.fa-plane
+                    |  Dự đoán giá vé máy bay
+                p Dự đoán giá vé máy bay dựa trên thông tin chuyến bay của bạn
+                .header-actions
+                    a.history-link(href="/history")
+                        i.fas.fa-history
+                        |  Lịch sử dự đoán
+
+            .form-container
+                form(action="/predict", method="POST")
+                    .form-group
+                        label(for="airline")
+                            i.fas.fa-building
+                            |  Hãng hàng không
+                        select(name="airline", id="airline", required)
+                            option(value="") Chọn hãng hàng không
+                            option(value="VietJet Air") VietJet Air
+                            option(value="Vietnam Airlines") Vietnam Airlines
+                            option(value="Bamboo Airways") Bamboo Airways
+                            option(value="Jetstar Pacific") Jetstar Pacific
+                            option(value="Vietravel Airlines") Vietravel Airlines
+
+                    .form-group
+                        label(for="departureCity")
+                            i.fas.fa-plane-departure
+                            |  Thành phố khởi hành
+                        select(name="departureCity", id="departureCity", required)
+                            option(value="") Chọn thành phố khởi hành
+                            option(value="Hà Nội") Hà Nội
+                            option(value="TP.HCM") TP.HCM
+                            option(value="Đà Nẵng") Đà Nẵng
+                            option(value="Hải Phòng") Hải Phòng
+                            option(value="Nha Trang") Nha Trang
+                            option(value="Phú Quốc") Phú Quốc
+
+                    .form-group
+                        label(for="arrivalCity")
+                            i.fas.fa-plane-arrival
+                            |  Thành phố đến
+                        select(name="arrivalCity", id="arrivalCity", required)
+                            option(value="") Chọn thành phố đến
+                            option(value="Hà Nội") Hà Nội
+                            option(value="TP.HCM") TP.HCM
+                            option(value="Đà Nẵng") Đà Nẵng
+                            option(value="Hải Phòng") Hải Phòng
+                            option(value="Nha Trang") Nha Trang
+                            option(value="Phú Quốc") Phú Quốc
+
+                    .form-group
+                        label(for="travelClass")
+                            i.fas.fa-crown
+                            |  Hạng vé
+                        select(name="travelClass", id="travelClass", required)
+                            option(value="") Chọn hạng vé
+                            option(value="Thương gia") Thương gia
+                            option(value="Phổ thông đặc biệt") Phổ thông đặc biệt
+                            option(value="Phổ thông") Phổ thông
+
+                    .form-group
+                        label(for="stops")
+                            i.fas.fa-route
+                            |  Số điểm dừng
+                        select(name="stops", id="stops", required)
+                            option(value="") Chọn số điểm dừng
+                            option(value="0") Bay thẳng (0 điểm dừng)
+                            option(value="1") 1 điểm dừng
+                            option(value="2") 2 điểm dừng
+
+                    .form-group
+                        label(for="departureFullTime")
+                            i.fas.fa-clock
+                            |  Thời gian khởi hành (Ngày & Giờ)
+                        input(type="datetime-local", name="departureFullTime", id="departureFullTime", required)
+
+                    .form-group
+                        label(for="arrivalFullTime")
+                            i.fas.fa-clock
+                            |  Thời gian đến (Ngày & Giờ)
+                        input(type="datetime-local", name="arrivalFullTime", id="arrivalFullTime", required)
+
+                    .form-group
+                        label(for="predictionDate")
+                            i.fas.fa-calendar-check
+                            |  Ngày dự đoán (Ngày hiện tại)
+                        input(type="date", name="predictionDate", id="predictionDate", required)
+
+                    .form-group
+                        label(for="duration")
+                            i.fas.fa-hourglass-half
+                            |  Thời lượng bay (phút)
+                        input(type="number", name="duration", id="duration", placeholder="Ví dụ: 120", min="30", max="1000", required)
+
+                    .form-group.model-selection
+                        label
+                            i.fas.fa-brain
+                            |  Chọn mô hình dự đoán
+                        .model-checkboxes
+                            .model-option
+                                input(type="checkbox", name="models", value="RandomForestRegressor", id="rf", checked)
+                                label(for="rf")
+                                    .model-name Random Forest
+                                    .model-desc Độ chính xác cao, cân bằng tốt
+                            .model-option
+                                input(type="checkbox", name="models", value="DecisionTreeRegressor", id="dt")
+                                label(for="dt")
+                                    .model-name Decision Tree
+                                    .model-desc Nhanh, dễ hiểu
+                            .model-option
+                                input(type="checkbox", name="models", value="StackingRegressor", id="stack")
+                                label(for="stack")
+                                    .model-name Stacking
+                                    .model-desc Kết hợp nhiều model, độ chính xác cao
+
+                    .form-actions
+                        button(type="submit", class="btn btn-primary")
+                            i.fas.fa-magic-wand-sparkles
+                            |  Dự đoán giá vé
+                        button(type="reset", class="btn btn-secondary")
+                            i.fas.fa-undo
+                            |  Đặt lại
+
+        script.
+            // Set default datetime for departure and arrival to tomorrow at current time
+            document.addEventListener('DOMContentLoaded', function() {
+                const now = new Date();
+                now.setDate(now.getDate() + 1); // Default to tomorrow
+                const year = now.getFullYear();
+                const month = (now.getMonth() + 1).toString().padStart(2, '0');
+                const day = now.getDate().toString().padStart(2, '0');
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+
+                const datetimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
+                document.getElementById('departureFullTime').value = datetimeString;
+                document.getElementById('arrivalFullTime').value = datetimeString;
+
+                // Set default prediction date to today
+                const today = new Date();
+                const todayDateString = today.toISOString().split('T')[0];
+                document.getElementById('predictionDate').value = todayDateString;
+
+
+            // Validation to prevent same departure and arrival cities
+            document.getElementById('arrivalCity').addEventListener('change', function() {
+                const departure = document.getElementById('departureCity').value;
+                const arrival = this.value;
+                if (departure === arrival && departure !== '') {
+                    alert('Thành phố khởi hành và đến không được trùng nhau!');
+                    this.value = '';
+                }
+            });
+
+            document.getElementById('departureCity').addEventListener('change', function() {
+                const arrival = document.getElementById('arrivalCity').value;
+                if (this.value === arrival && this.value !== '') {
+                    document.getElementById('arrivalCity').value = '';
+                }
+            });
+
+            // Validation for model selection
+            document.querySelector('form').addEventListener('submit', function(e) {
+                const checkedModels = document.querySelectorAll('input[name="models"]:checked');
+                if (checkedModels.length === 0) {
+                    alert('Vui lòng chọn ít nhất một mô hình dự đoán!');
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Update form action based on selected models
+            document.querySelectorAll('input[name="models"]').forEach(function(checkbox) {
+                checkbox.addEventListener('change', function() {
+                    const checkedModels = document.querySelectorAll('input[name="models"]:checked');
+                    const modelCount = checkedModels.length;
+
+                    // Update submit button text
+                    const submitBtn = document.querySelector('button[type="submit"]');
+                    if (modelCount > 1) {
+                        submitBtn.innerHTML = '<i class="fas fa-magic-wand-sparkles"></i> So sánh ' + modelCount + ' mô hình';
+                    } else {
+                        submitBtn.innerHTML = '<i class="fas fa-magic-wand-sparkles"></i> Dự đoán giá vé';
+                    }
+                });
+            });

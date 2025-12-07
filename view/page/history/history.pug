@@ -1,0 +1,163 @@
+doctype html
+html(lang="vi")
+    head
+        meta(charset="UTF-8")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title Lịch sử dự đoán giá vé máy bay
+        link(rel="stylesheet", href="/style.css")
+        link(href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css", rel="stylesheet")
+    body
+        .container
+            .header
+                h1
+                    i.fas.fa-history
+                    |  Lịch sử dự đoán giá vé máy bay
+                p Xem lại các lần dự đoán trước đây của bạn
+
+            .nav-actions
+                a.btn.btn-primary(href="/")
+                    i.fas.fa-plus
+                    |  Dự đoán mới
+                button.btn.btn-secondary(onclick="clearHistory()")
+                    i.fas.fa-trash
+                    |  Xóa lịch sử
+
+            if history && history.length > 0
+                .history-list
+                    each item, index in history
+                        - const fd = item.flightData || {};
+                        - const pred = item.prediction || {};
+                        - const depDate = fd.departureFullTime ? new Date(fd.departureFullTime) : (fd.departureTime ? new Date(fd.departureTime) : null);
+                        - const arrDate = fd.arrivalFullTime ? new Date(fd.arrivalFullTime) : (fd.arrivalTime ? new Date(fd.arrivalTime) : null);
+                        - const predDate = fd.predictionDate ? new Date(fd.predictionDate) : null;
+                        - const validDep = depDate && !isNaN(depDate.getTime());
+                        - const validArr = arrDate && !isNaN(arrDate.getTime());
+                        - const validPred = predDate && !isNaN(predDate.getTime());
+                        - const daysLeftComputed = (validDep && validPred) ? Math.ceil((depDate - predDate)/(1000*60*60*24)) : null;
+                        - const daysLeft = (fd.daysLeft != null) ? fd.daysLeft : (daysLeftComputed != null ? daysLeftComputed : '—');
+                        - const depDateDisplay = validDep ? depDate.toLocaleDateString('vi-VN') : (fd.departureFullTime || '—');
+                        - const depTimeDisplay = validDep ? depDate.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'}) : (fd.departureTime || '—');
+                        - const arrDateDisplay = validArr ? arrDate.toLocaleDateString('vi-VN') : (fd.arrivalFullTime || '—');
+                        - const arrTimeDisplay = validArr ? arrDate.toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'}) : (fd.arrivalTime || '—');
+                        - const durationDisplay = (fd.duration != null && fd.duration !== '') ? (String(fd.duration) + ' phút') : '—';
+                        - const stopsDisplay = (fd.stops != null && fd.stops !== '') ? (Number(fd.stops) === 0 ? 'Bay thẳng' : `${fd.stops} điểm dừng`) : '—'
+                        .history-item
+                            .history-header
+                                .history-date
+                                    i.fas.fa-calendar
+                                    | #{ (item.timestamp) ? new Date(item.timestamp).toLocaleString('vi-VN') : '—' }
+                                .history-route
+                                    .route-info
+                                        strong= fd.departureCity || '—'
+                                        |  →
+                                        strong= fd.arrivalCity || '—'
+                                    .route-details
+                                        | #{fd.airline || '—'} • #{fd.travelClass || '—'} • #{stopsDisplay}
+
+                            .history-flight-details
+                                .detail-grid
+                                    .detail-item
+                                        .label Ngày bay:
+                                        .value= depDateDisplay
+                                    .detail-item
+                                        .label Hãng bay:
+                                        .value= fd.airline || '—'
+                                    .detail-item
+                                        .label Giờ khởi hành:
+                                        .value= depTimeDisplay
+                                    .detail-item
+                                        .label Giờ đến:
+                                        .value= arrTimeDisplay
+                                    .detail-item
+                                        .label Thời lượng:
+                                        .value= durationDisplay
+                                    .detail-item
+                                        .label Ngày đặt trước:
+                                        .value= (daysLeft !== null && daysLeft !== undefined) ? `${daysLeft} ngày` : '—'
+
+                            .history-prediction-results
+                                h4
+                                    i.fas.fa-chart-bar
+                                    |  Kết quả dự đoán (#{ (pred.summary && pred.summary.successful_predictions) ? pred.summary.successful_predictions : (pred.results ? pred.results.length : 0) }/#{ (pred.summary && pred.summary.total_models) ? pred.summary.total_models : (pred.results ? pred.results.length : 0) } model thành công)
+
+                                .results-grid
+                                    if pred && pred.results && pred.results.length
+                                        each result in pred.results
+                                            - const isSelected = !!result.selected;
+                                            - const isLowest = !!result.is_lowest || !!result.is_lowest;
+                                            - const isHighest = !!result.is_highest || !!result.is_highest;
+                                            .result-card(class=isSelected ? 'selected' : '', class=isLowest ? 'best-price' : '', class=isHighest ? 'highest-price' : '')
+                                                .model-info
+                                                    .model-name
+                                                        case result.model
+                                                            when 'RandomForestRegressor'
+                                                                | 🌲 Random Forest
+                                                            when 'DecisionTreeRegressor'
+                                                                | 🌳 Decision Tree
+                                                            when 'StackingRegressor'
+                                                                | 📚 Stacking
+                                                            default
+                                                                = result.model
+                                                    if isSelected
+                                                        .selected-badge
+                                                            i.fas.fa-check
+                                                            |  Được chọn
+
+                                                if result.success
+                                                    .model-price
+                                                        .price-value= result.formatted_price || (result.price ? (result.price.toLocaleString() + ' VND') : '—')
+                                                        if result.is_lowest || isLowest
+                                                            .price-badge.best
+                                                                i.fas.fa-star
+                                                                |  Giá tốt nhất
+                                                        else if result.is_highest || isHighest
+                                                            .price-badge.highest
+                                                                i.fas.fa-arrow-up
+                                                                |  Giá cao nhất
+                                                        else if result.price_diff
+                                                            .price-diff +#{ result.price_diff.toLocaleString ? result.price_diff.toLocaleString() : result.price_diff } VND so với giá tốt nhất
+                                                else
+                                                    .model-error
+                                                        i.fas.fa-exclamation-triangle
+                                                        |  Lỗi: #{result.error || 'Không dự đoán được'}
+                                    else
+                                        p.text-muted Không có kết quả dự đoán trong bản ghi này.
+
+                                if pred && pred.summary && pred.summary.price_range
+                                    .price-range-summary
+                                        .range-label Khoảng giá:
+                                        .range-value= pred.summary.price_range
+
+            else
+                .no-history
+                    .no-history-icon
+                        i.fas.fa-history
+                    h3 Chưa có lịch sử dự đoán
+                    p Bạn chưa thực hiện dự đoán nào. Hãy thử dự đoán giá vé máy bay!
+                    a.btn.btn-primary(href="/")
+                        i.fas.fa-plane
+                        |  Bắt đầu dự đoán
+
+        script.
+            function clearHistory() {
+                if (confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử dự đoán?')) {
+                    fetch('/clear-history', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Có lỗi xảy ra khi xóa lịch sử');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Có lỗi xảy ra khi xóa lịch sử');
+                    });
+                }
+            }
