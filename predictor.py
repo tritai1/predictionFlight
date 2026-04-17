@@ -78,6 +78,9 @@ def predict_with_model(data, model_name):
 
         # Transform data
         input_encoded = preprocessor.transform(input_data_df)
+        # Chuyển đổi csr_matrix thành mảng numpy dày đặc
+        if hasattr(input_encoded, 'toarray'):
+            input_encoded = input_encoded.toarray()
 
         # Dự đoán
         prediction = model.predict(input_encoded)[0]
