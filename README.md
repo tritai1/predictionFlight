@@ -440,10 +440,26 @@ Xóa lịch sử dự đoán
   - Classification → Phân loại rời rạc (rẻ, vừa, đắt)
 
 **Metrics Đánh Giá:**
-- **R² Score**: Tỷ lệ phương sai được giải thích (0-1)
-- **MAE (Mean Absolute Error)**: Lỗi tuyệt đối trung bình
-- **RMSE (Root Mean Squared Error)**: Căn bậc hai của MSE
-- **MAPE (Mean Absolute Percentage Error)**: Lỗi phần trăm
+
+Basic Metrics:
+- **MAE**: $\text{MAE} = \frac{1}{m} \sum_{i=1}^{m} |y^{(i)} - \hat{y}^{(i)}|$
+  - Average absolute error (dễ hiểu, cùng đơn vị với target)
+
+- **RMSE**: $\text{RMSE} = \sqrt{\frac{1}{m} \sum_{i=1}^{m} (y^{(i)} - \hat{y}^{(i)})^2}$
+  - Root mean squared error (penalize large errors)
+
+- **R² Score**: $R^2 = 1 - \frac{\sum(y^{(i)} - \hat{y}^{(i)})^2}{\sum(y^{(i)} - \bar{y})^2}$
+  - Ratio of explained variance (0-1, higher is better)
+
+- **MAPE**: $\text{MAPE} = \frac{100\%}{m} \sum_{i=1}^{m} \left|\frac{y^{(i)} - \hat{y}^{(i)}}{y^{(i)}}\right|$
+  - Mean absolute percentage error (scale-independent)
+
+Advanced Metrics (Log Transform):
+- **RMSLE**: $\text{RMSLE} = \sqrt{\frac{1}{m} \sum_{i=1}^{m} (\log(y^{(i)}+1) - \log(\hat{y}^{(i)}+1))^2}$
+  - Using log1p to reduce outlier impact
+
+- **Log-MAE**: $\text{MAE}_{\log} = \frac{1}{m} \sum_{i=1}^{m} |\log(y^{(i)}+1) - \log(\hat{y}^{(i)}+1)|$
+  - MAE on log-transformed values
 
 ### 2. **Decision Tree (Cây Quyết Định)**
 ```
@@ -486,6 +502,137 @@ Xóa lịch sử dự đoán
 
 ### 7. **Model Evaluation (Đánh Giá Model)**
 
+#### **7.1 Các Công Thức Đánh Giá Chi Tiết**
+
+**a) Mean Absolute Error (MAE) - Lỗi Tuyệt Đối Trung Bình:**
+$$\text{MAE} = \frac{1}{m} \sum_{i=1}^{m} |y^{(i)} - \hat{y}^{(i)}|$$
+
+Ý nghĩa: Average của lỗi dự đoán tuyệt đối (không phân biệt dấu)
+- **Ưu**: Dễ hiểu, cùng đơn vị với dữ liệu
+- **Nhược**: Không nhạy cảm với lỗi lớn
+
+**b) Mean Squared Error (MSE) & Root Mean Squared Error (RMSE):**
+$$\text{MSE} = \frac{1}{m} \sum_{i=1}^{m} (y^{(i)} - \hat{y}^{(i)})^2$$
+
+$$\text{RMSE} = \sqrt{\text{MSE}} = \sqrt{\frac{1}{m} \sum_{i=1}^{m} (y^{(i)} - \hat{y}^{(i)})^2}$$
+
+Ý nghĩa: Căn bậc hai của trung bình bình phương lỗi
+- **Ưu**: Nhạy cảm với lỗi lớn (penalize outliers), dễ optimize
+- **Nhược**: Bị ảnh hưởng nhiều bởi outliers, rất lớn khi có lỗi bất thường
+
+**c) Mean Absolute Percentage Error (MAPE) - Lỗi Phần Trăm:**
+$$\text{MAPE} = \frac{100\%}{m} \sum_{i=1}^{m} \left|\frac{y^{(i)} - \hat{y}^{(i)}}{y^{(i)}}\right|$$
+
+Ý nghĩa: Lỗi trung bình tính theo phần trăm của giá trị thực tế
+- **Ưu**: Scale-independent, dễ so sánh giữa các dataset khác nhau
+- **Nhược**: Undefined khi $y^{(i)} = 0$, không symmetric
+
+**d) Root Mean Squared Logarithmic Error (RMSLE) - Log Transform:**
+$$\text{RMSLE} = \sqrt{\frac{1}{m} \sum_{i=1}^{m} (\log(y^{(i)} + 1) - \log(\hat{y}^{(i)} + 1))^2}$$
+
+Công thức chi tiết:
+$$\text{RMSLE} = \sqrt{\frac{1}{m} \sum_{i=1}^{m} \left[\log\left(\frac{y^{(i)} + 1}{\hat{y}^{(i)} + 1}\right)\right]^2}$$
+
+Ý nghĩa: RMSE trên log-transformed values (sử dụng log1p)
+- **Ưu**: Giảm penalize của outliers, tốt cho dữ liệu biến thiên mạnh
+- **Nhược**: Phức tạp hơn, khó interpret
+
+**e) Mean Absolute Percentage Error với Log (Log-MAPE):**
+$$\text{Log-MAPE} = \frac{100\%}{m} \sum_{i=1}^{m} \left|\frac{\log(y^{(i)} + 1) - \log(\hat{y}^{(i)} + 1)}{\log(y^{(i)} + 1)}\right|$$
+
+Ý nghĩa: MAPE được tính trên log-transformed values
+
+**f) Coefficient of Determination (R²) - Hệ Số Xác Định:**
+$$R^2 = 1 - \frac{SS_{res}}{SS_{tot}} = 1 - \frac{\sum_{i=1}^{m}(y^{(i)} - \hat{y}^{(i)})^2}{\sum_{i=1}^{m}(y^{(i)} - \bar{y})^2}$$
+
+Hay viết cách khác:
+$$R^2 = \frac{\sum_{i=1}^{m}(\hat{y}^{(i)} - \bar{y})^2}{\sum_{i=1}^{m}(y^{(i)} - \bar{y})^2}$$
+
+Ý nghĩa: Tỷ lệ phương sai được model giải thích
+- Range: [0, 1] (hoặc âm nếu model quá kém)
+- **R² = 0.85** → Model giải thích 85% phương sai
+- **R² = 1.0** → Perfect fit (nghi ngờ overfitting)
+- **R² < 0** → Tệ hơn cả baseline (mean prediction)
+
+**g) Adjusted R² - R² Điều Chỉnh:**
+$$\text{Adjusted } R^2 = 1 - \frac{(1-R^2)(m-1)}{m-p-1}$$
+
+Ở đó:
+- $m$ = số samples
+- $p$ = số features
+
+Ý nghĩa: R² được điều chỉnh theo số features (penalize model complexity)
+- Tốt hơn R² khi có nhiều features
+
+#### **7.2 Biến Thể với Log1p Transformation**
+
+**MAE với Log Transform:**
+$$\text{MAE}_{\log} = \frac{1}{m} \sum_{i=1}^{m} |\log_10(y^{(i)}) - \log_10(\hat{y}^{(i)})|$$
+
+Hoặc sử dụng log1p (để tránh log(0)):
+$$\text{MAE}_{\log1p} = \frac{1}{m} \sum_{i=1}^{m} |\log(y^{(i)} + 1) - \log(\hat{y}^{(i)} + 1)|$$
+
+**RMSE với Log Transform:**
+$$\text{RMSE}_{\log} = \sqrt{\frac{1}{m} \sum_{i=1}^{m} (\log(y^{(i)} + 1) - \log(\hat{y}^{(i)} + 1))^2}$$
+
+**Symmetric MAPE (SMAPE) - Cải Tiến MAPE:**
+$$\text{SMAPE} = \frac{100\%}{m} \sum_{i=1}^{m} \frac{|y^{(i)} - \hat{y}^{(i)}|}{(|y^{(i)}| + |\hat{y}^{(i)}|)/2}$$
+
+Ý nghĩa: MAPE được cân bằng, không bị bias khi có giá trị 0
+
+#### **7.3 Khi Nào Sử Dụng Từng Metric?**
+
+| Metric | Khi Nào Dùng | Ưu Điểm | Nhược Điểm |
+|--------|-------------|---------|-----------|
+| **MAE** | Lỗi trung bình đơn giản | Dễ hiểu, robust | Không penalize lỗi lớn |
+| **RMSE** | Cost function optimization | Differentiable, penalize outliers | Sensitive to outliers |
+| **R²** | So sánh % variance explained | Normalized [0,1] | Có thể misleading |
+| **MAPE** | % error comparison | Scale-independent | Undefined at 0 |
+| **RMSLE** | Outliers nhiều, biến thiên mạnh | Giảm outlier impact | Phức tạp, khó interpret |
+| **Log-MAE** | Data skewed, heteroskedastic | Giảm large error penalize | Khó interpret |
+
+#### **7.4 Áp Dụng cho Flight Price Prediction**
+
+Cho dự án này, khoảng giá: **450,000 - 2,500,000 VND**
+
+**Metrics được sử dụng:**
+- **RMSE**: Chính thức, sensitive to outliers
+- **MAE**: Secondary, dễ hiểu (lỗi trung bình VND)
+- **R²**: Đánh giá % variance
+- **MAPE**: So sánh % error
+- **RMSLE** (tuỳ chọn): Nếu data có outliers
+
+**Công thức đánh giá cụ thể:**
+```python
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import numpy as np
+
+# RMSE
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+
+# MAE
+mae = mean_absolute_error(y_test, y_pred)
+
+# R²
+r2 = r2_score(y_test, y_pred)
+
+# MAPE
+mape = np.mean(np.abs((y_test - y_pred) / y_test)) * 100
+
+# RMSLE (với log1p)
+rmsle = np.sqrt(np.mean((np.log1p(y_test) - np.log1p(y_pred))**2))
+
+# Log-MAE
+log_mae = np.mean(np.abs(np.log1p(y_test) - np.log1p(y_pred)))
+
+print(f"RMSE: {rmse:,.0f} VND")
+print(f"MAE: {mae:,.0f} VND")
+print(f"R²: {r2:.4f}")
+print(f"MAPE: {mape:.2f}%")
+print(f"RMSLE: {rmsle:.6f}")
+print(f"Log-MAE: {log_mae:.6f}")
+```
+
 **Cross-Validation:**
 ```
 Data → [Fold1 | Fold2 | Fold3 | Fold4 | Fold5]
@@ -495,8 +642,8 @@ Train → [1,3,4,5] → Test [2]
 ```
 
 **Metrics:**
-- MAE, RMSE, R², MAPE
-- So sánh model để chọn tốt nhất
+- So sánh model sử dụng tất cả các metrics trên
+- Chọn model dựa trên RMSE + MAPE kết hợp
 
 ### 8. **Hyperparameter Tuning (Điều Chỉnh Siêu Tham Số)**
 
@@ -699,18 +846,6 @@ Qua dự án này, bạn học được:
 3. Web application development
 4. Integration giữa Python & JavaScript
 5. Industry best practices
-
----
-
-## 📞 Liên Hệ & Support
-
-Nếu có câu hỏi hoặc vấn đề:
-- Review code & error logs
-- Test einzeln từng component
-- Consult offline documentation
-- Optimize and refactor khi cần thiết
-
-**Chúc bạn học tập và phát triển thành công! 🚀**
 
 ---
 

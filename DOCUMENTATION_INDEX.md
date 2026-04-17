@@ -105,6 +105,44 @@ Dây là hệ thống dự đoán giá vé máy bay sử dụng Machine Learning
 - Muốn optimize ⚡
 - Deployment issues 🚀
 
+### **5. [EVALUATION_METRICS.md](./EVALUATION_METRICS.md)** - Công Thức Đánh Giá 📊 **⭐ NEW**
+**Nội dung chính:**
+- 📐 **Basic Metrics** với công thức đầy đủ
+  - MAE: $\text{MAE} = \frac{1}{m} \sum |y^{(i)} - \hat{y}^{(i)}|$
+  - RMSE: $\text{RMSE} = \sqrt{\frac{1}{m} \sum (y^{(i)} - \hat{y}^{(i)})^2}$
+  - R²: $R^2 = 1 - \frac{SS_{res}}{SS_{tot}}$
+  - MAPE: $\text{MAPE} = \frac{100\%}{m} \sum |\frac{y^{(i)} - \hat{y}^{(i)}}{y^{(i)}}|$
+
+- 🔬 **Log-Transformed Metrics** (log1p & variations)
+  - RMSLE: $\text{RMSLE} = \sqrt{\frac{1}{m} \sum (\log(y+1) - \log(\hat{y}+1))^2}$
+  - SMAPE (Symmetric): $\text{SMAPE} = \frac{100\%}{m} \sum \frac{2|y - \hat{y}|}{|y| + |\hat{y}|}$
+  - MAE_log: $\text{MAE}_{log} = \frac{1}{m} \sum |\log(y+1) - \log(\hat{y}+1)|$
+
+- 🚀 **Advanced Metrics**
+  - Quantile Loss
+  - Huber Loss
+
+- 📋 **So Sánh & Chọn Metric**
+  - Decision tree cho việc lựa chọn
+  - Pro/cons từng metric
+  - Recommendation cho Flight Price Prediction
+
+- 💻 **Code Examples**
+  - Tất cả metrics implementation
+  - Custom evaluation function
+  - Cross-validation scoring
+
+- 📈 **Visualization**
+  - Residual plots
+  - Actual vs Predicted
+  - Error distribution
+
+**Nên đọc khi:**
+- Muốn hiểu sâu về evaluation metrics
+- Cần log-transformed variants (RMSLE, SMAPE)
+- Chọn metric phù hợp cho project
+- Tìm code examples cho evaluation
+
 ---
 
 ## 🎯 Quick Navigation by Use Case
@@ -155,12 +193,13 @@ TROUBLESHOOTING.md
 
 ## 📋 Document Quick Reference
 
-| Document | Purpose | Best For | Length |
-|----------|---------|----------|--------|
-| [README.md](./README.md) | Overview & setup | Everyone | 📄 Long |
-| [ML_CONCEPTS.md](./ML_CONCEPTS.md) | Theory & math | Data scientists | 📄 Long |
-| [DATA_PROCESSING_GUIDE.md](./DATA_PROCESSING_GUIDE.md) | Practical guide | Developers | 📄 Long |
-| [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) | Problem solving | All | 📄 Long |
+| Document | Purpose | Best For | Formulas |
+|----------|---------|----------|----------|
+| [README.md](./README.md) | Overview & setup | Everyone | Basic concepts |
+| [ML_CONCEPTS.md](./ML_CONCEPTS.md) | Theory & algorithms | Data scientists | 8+ formulas |
+| [DATA_PROCESSING_GUIDE.md](./DATA_PROCESSING_GUIDE.md) | Practical guide | Developers | Implementation |
+| [TROUBLESHOOTING.md](./TROUBLESHOOTING.md) | Problem solving | All | Debug patterns |
+| [EVALUATION_METRICS.md](./EVALUATION_METRICS.md) **NEW** | Detailed metrics | ML Engineers | 15+ formulas |
 
 ---
 
@@ -269,11 +308,23 @@ predictionFlight/
 **"How do I train a model?"**
 → [DATA_PROCESSING_GUIDE.md - Model Training](./DATA_PROCESSING_GUIDE.md#model-training-process)
 
+**"What evaluation metrics should I use?"** ⭐ **NEW**
+→ [EVALUATION_METRICS.md - Choosing Metrics](./EVALUATION_METRICS.md#so-sánh--chọn-metric)
+
+**"What is RMSLE and when to use log1p?"** ⭐ **NEW**
+→ [EVALUATION_METRICS.md - RMSLE](./EVALUATION_METRICS.md#1-root-mean-squared-logarithmic-error-rmsle)
+
 **"Why is RMSE high?"**
 → [TROUBLESHOOTING.md - RMSE quá cao](./TROUBLESHOOTING.md#lỗi-5-rmse-quá-cao-model-không-chính-xác)
 
 **"I got 'Model not found' error"**
 → [TROUBLESHOOTING.md - Model không tồn tại](./TROUBLESHOOTING.md#lỗi-1-model-name-không-tồn-tại)
+
+**"I need MAE, RMSE, MAPE code examples"** ⭐ **NEW**
+→ [EVALUATION_METRICS.md - Code Examples](./EVALUATION_METRICS.md#implementation-trong-python)
+
+**"How do I visualize model performance?"** ⭐ **NEW**
+→ [EVALUATION_METRICS.md - Visualization](./EVALUATION_METRICS.md#visualization--interpretation)
 
 **"How do I optimize predictions?"**
 → [TROUBLESHOOTING.md - Performance Optimization](./TROUBLESHOOTING.md#performance-optimization)
@@ -342,11 +393,12 @@ TROUBLESHOOTING.md
 
 | Document | Sections | Code Examples | Formulas | Pages* |
 |----------|----------|---------------|----------|--------|
-| README.md | 15+ | 10+ | 2 | ~15 |
+| README.md | 17+ | 12+ | 8 | ~18 |
 | ML_CONCEPTS.md | 10+ | 20+ | 8 | ~12 |
 | DATA_PROCESSING_GUIDE.md | 12+ | 30+ | 0 | ~14 |
 | TROUBLESHOOTING.md | 15+ | 25+ | 0 | ~13 |
-| **TOTAL** | **52+** | **85+** | **10** | **~54** |
+| EVALUATION_METRICS.md **NEW** | 12+ | 15+ | 15+ | ~16 |
+| **TOTAL** | **66+** | **102+** | **31+** | **~73** |
 
 *Rough estimate (A4 @ 11pt font)
 
@@ -375,8 +427,9 @@ TROUBLESHOOTING.md
 
 ## 📝 Last Updated
 - **Date**: April 17, 2026
-- **Version**: 1.0
+- **Version**: 1.1
 - **Status**: Complete & Production Ready ✅
+- **Latest Addition**: EVALUATION_METRICS.md (15+ formulas with log1p variants)
 
 ---
 
